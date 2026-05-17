@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -6,36 +7,21 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Gospel App'),
-      ),
-      body: ListView(
-        children: [
-          ListTile(
-            title: const Text("Songs"),
-            onTap: () {},
-          ),
-
-          ListTile(
-            title: const Text("Artists"),
-            onTap: () {},
-          ),
-
-          ListTile(
-            title: const Text("Bible"),
-            onTap: () {},
-          ),
-
-          ListTile(
-            title: const Text("Charts"),
-            onTap: () {},
-          ),
-
-          ListTile(
-            title: const Text("Sponsorships"),
-            onTap: () {},
-          ),
-        ],
+      appBar: AppBar(title: const Text("Home")),
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () => context.go('/bible'),
+              child: const Text("Go to Bible"),
+            ),
+            ElevatedButton(
+              onPressed: () => context.go('/songs'),
+              child: const Text("Go to Songs"),
+            ),
+          ],
+        ),
       ),
     );
   }
