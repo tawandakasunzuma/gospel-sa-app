@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import 'features/home/home_screen.dart';
+import 'core/app_router.dart';
 
 void main() {
-  runApp(const GospelApp());
+  runApp(const MyApp());
 }
 
-class GospelApp extends StatelessWidget {
-  const GospelApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Gospel App',
-      home: const HomeScreen(),
+      routerConfig: AppRouter.router,
     );
   }
 }
