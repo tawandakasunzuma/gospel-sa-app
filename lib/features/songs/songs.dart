@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gospel_app/services/audio_service.dart';
 
 class SongsScreen extends StatelessWidget {
   const SongsScreen({super.key});
@@ -13,10 +14,22 @@ class SongsScreen extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: const [
-          _SongTile(title: "Amazing Grace", artist: "Traditional"),
-          _SongTile(title: "How Great Thou Art", artist: "Hymn"),
-          _SongTile(title: "Holy Spirit", artist: "Jesus Culture"),
-          _SongTile(title: "Way Maker", artist: "Sinach"),
+          _SongTile(
+            title: "Amazing Grace",
+            artist: "Traditional",
+          ),
+          _SongTile(
+            title: "How Great Thou Art",
+            artist: "Hymn",
+          ),
+          _SongTile(
+            title: "Holy Spirit",
+            artist: "Jesus Culture",
+          ),
+          _SongTile(
+            title: "Way Maker",
+            artist: "Sinach",
+          ),
         ],
       ),
     );
@@ -40,9 +53,15 @@ class _SongTile extends StatelessWidget {
         title: Text(title),
         subtitle: Text(artist),
         trailing: const Icon(Icons.play_arrow),
-        onTap: () {
+
+        onTap: () async {
+          const url =
+              "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
+
+          await AudioService.playUrl(url);
+
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Play $title (audio next step)")),
+            SnackBar(content: Text("Playing $title")),
           );
         },
       ),
