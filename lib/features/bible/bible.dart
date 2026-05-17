@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 
-class Bible extends StatelessWidget {
-  const Bible({super.key});
+class BibleScreen extends StatelessWidget {
+  const BibleScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Bible")),
-      body: const Center(child: Text("Bible Page")),
+    return const Scaffold(
+      body: Center(
+        child: Text("Bible Screen"),
+      ),
     );
   }
 }
