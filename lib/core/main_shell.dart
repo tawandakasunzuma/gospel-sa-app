@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:gospel_app/widgets/mini_player.dart';
 
 class MainShell extends StatefulWidget {
   final Widget child;
@@ -24,21 +25,30 @@ class _MainShellState extends State<MainShell> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: widget.child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        onTap: onTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Bible',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.music_note),
-            label: 'Songs',
+
+      // 👇 Mini player + bottom nav stacked
+      bottomNavigationBar: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const MiniPlayer(),
+
+          BottomNavigationBar(
+            currentIndex: _index,
+            onTap: onTap,
+            items: const [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.home),
+                label: 'Home',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.menu_book),
+                label: 'Bible',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.music_note),
+                label: 'Songs',
+              ),
+            ],
           ),
         ],
       ),

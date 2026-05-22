@@ -4,29 +4,32 @@ class AudioService {
   static final AudioPlayer player = AudioPlayer();
 
   static String? currentUrl;
+  static String? currentTitle;
 
-  static Future<void> playUrl(String url) async {
+  static Future<void> playUrl({
+    required String url,
+    required String title,
+  }) async {
+    // pause if same song is playing
     if (currentUrl == url && player.playing) {
       await player.pause();
       return;
     }
 
-    if (currentUrl == url && player.processingState == ProcessingState.ready) {
+    // resume if paused same song
+    if (currentUrl == url && !player.playing) {
       await player.play();
       return;
     }
 
     currentUrl = url;
+    currentTitle = title;
+
     await player.setUrl(url);
     await player.play();
   }
 
-  static Future<void> stop() async {
-    await player.stop();
-    currentUrl = null;
-  }
-
-  static bool isPlayingUrl(String url) {
+  static bool isPlaying(String url) {
     return currentUrl == url && player.playing;
   }
 }

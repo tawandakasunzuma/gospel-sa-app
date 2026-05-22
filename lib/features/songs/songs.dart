@@ -30,10 +30,6 @@ class _SongsScreenState extends State<SongsScreen> {
     });
   }
 
-  void refreshUI() {
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,7 +46,7 @@ class _SongsScreenState extends State<SongsScreen> {
                 final song = songs[index];
 
                 final isPlaying =
-                    AudioService.isPlayingUrl(song['url']);
+                    AudioService.isPlaying(song['url']);
 
                 return Card(
                   child: ListTile(
@@ -67,9 +63,12 @@ class _SongsScreenState extends State<SongsScreen> {
                           : Icons.play_arrow,
                     ),
                     onTap: () async {
-                      await AudioService.playUrl(song['url']);
+                      await AudioService.playUrl(
+                        url: song['url'],
+                        title: song['title'],
+                      );
 
-                      refreshUI();
+                      setState(() {});
 
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
