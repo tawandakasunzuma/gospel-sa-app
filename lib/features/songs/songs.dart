@@ -1,8 +1,34 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:gospel_app/services/audio_service.dart';
 
-class SongsScreen extends StatelessWidget {
+class SongsScreen extends StatefulWidget {
   const SongsScreen({super.key});
+
+  @override
+  State<SongsScreen> createState() => _SongsScreenState();
+}
+
+class _SongsScreenState extends State<SongsScreen> {
+  final supabase = Supabase.instance.client;
+
+  List<Map<String, dynamic>> songs = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSongs();
+  }
+
+  Future<void> fetchSongs() async {
+    final data = await supabase.from('songs').select();
+
+    setState(() {
+      songs = List<Map<String, dynamic>>.from(data);
+      loading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -11,60 +37,33 @@ class SongsScreen extends StatelessWidget {
         title: const Text("Songs"),
         centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
-          _SongTile(
-            title: "Amazing Grace",
-            artist: "Traditional",
-          ),
-          _SongTile(
-            title: "How Great Thou Art",
-            artist: "Hymn",
-          ),
-          _SongTile(
-            title: "Holy Spirit",
-            artist: "Jesus Culture",
-          ),
-          _SongTile(
-            title: "Way Maker",
-            artist: "Sinach",
-          ),
-        ],
-      ),
-    );
-  }
-}
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: songs.length,
+              itemBuilder: (context, index) {
+                final song = songs[index];
 
-class _SongTile extends StatelessWidget {
-  final String title;
-  final String artist;
+                return Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.music_note),
+                    title: Text(song['title']),
+                    subtitle: Text(song['artist']),
+                    trailing: const Icon(Icons.play_arrow),
+                    onTap: () async {
+                      await AudioService.playUrl(song['url']);
 
-  const _SongTile({
-    required this.title,
-    required this.artist,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      child: ListTile(
-        leading: const Icon(Icons.music_note),
-        title: Text(title),
-        subtitle: Text(artist),
-        trailing: const Icon(Icons.play_arrow),
-
-        onTap: () async {
-          const url =
-              "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3";
-
-          await AudioService.playUrl(url);
-
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Playing $title")),
-          );
-        },
-      ),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text("Playing ${song['title']}"),
+                        ),
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
     );
   }
 }

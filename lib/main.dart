@@ -23,7 +23,7 @@ class GospelApp extends StatelessWidget {
     return MaterialApp.router(
       title: "Gospel App",
       debugShowCheckedModeBanner: false,
-      routerConfig: appRouter,
+      routerConfig: AppRouter.router,
     );
   }
 }
