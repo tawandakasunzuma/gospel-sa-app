@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:gospel_app/widgets/mini_player.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MainShell extends StatefulWidget {
   final Widget child;
@@ -21,34 +21,65 @@ class _MainShellState extends State<MainShell> {
     context.go(routes[index]);
   }
 
+  void logout() async {
+    await Supabase.instance.client.auth.signOut();
+
+    if (!mounted) return;
+
+    context.go('/login');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = Supabase.instance.client.auth.currentUser;
+
     return Scaffold(
-      body: widget.child,
-
-      // 👇 Mini player + bottom nav stacked
-      bottomNavigationBar: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const MiniPlayer(),
-
-          BottomNavigationBar(
-            currentIndex: _index,
-            onTap: onTap,
-            items: const [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.home),
-                label: 'Home',
+      appBar: AppBar(
+        title: const Text("Gospel App"),
+        centerTitle: true,
+        actions: [
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              if (value == 'logout') {
+                logout();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'user',
+                enabled: false,
+                child: Text(
+                  user?.email ?? 'Guest',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.menu_book),
-                label: 'Bible',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.music_note),
-                label: 'Songs',
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: 'logout',
+                child: Text('Logout'),
               ),
             ],
+          ),
+        ],
+      ),
+
+      body: widget.child,
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _index,
+        onTap: onTap,
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.menu_book),
+            label: 'Bible',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.music_note),
+            label: 'Songs',
           ),
         ],
       ),
