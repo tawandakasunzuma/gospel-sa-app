@@ -1,114 +1,151 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:gospel_app/services/audio_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final supabase = Supabase.instance.client;
+
+  List<Map<String, dynamic>> songs = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchSongs();
+  }
+
+  Future<void> fetchSongs() async {
+    final data = await supabase.from('songs').select();
+
+    setState(() {
+      songs = List<Map<String, dynamic>>.from(data);
+      loading = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final featured = songs.isNotEmpty ? songs.first : null;
+
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              const Text(
-                "Welcome 👋",
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Text(
-                "What would you like to do today?",
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-              ),
-
-              const SizedBox(height: 24),
-
-              // Quick actions
-              Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
+      appBar: AppBar(
+        title: const Text("Gospel Music"),
+        centerTitle: true,
+      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _HomeCard(
-                      icon: Icons.menu_book,
-                      title: "Bible",
-                      color: Colors.deepPurple,
-                      onTap: () => context.go('/bible'),
+
+                    // 🎧 FEATURED SECTION
+                    if (featured != null)
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(20),
+                        decoration: BoxDecoration(
+                          color: Colors.black,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "Featured Song",
+                              style: TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              featured['title'],
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              featured['artist'],
+                              style: const TextStyle(color: Colors.white70),
+                            ),
+                            const SizedBox(height: 10),
+                            ElevatedButton(
+                              onPressed: () async {
+                                await AudioService.playUrl(
+                                  url: featured['url'],
+                                  title: featured['title'],
+                                );
+
+                                setState(() {});
+                              },
+                              child: const Text("Play"),
+                            )
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 20),
+
+                    // 🎵 TRENDING SECTION
+                    const Text(
+                      "Trending Songs",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _HomeCard(
-                      icon: Icons.music_note,
-                      title: "Songs",
-                      color: Colors.blue,
-                      onTap: () => context.go('/songs'),
-                    ),
-                    _HomeCard(
-                      icon: Icons.star,
-                      title: "Artists",
-                      color: Colors.orange,
-                      onTap: () {},
-                    ),
-                    _HomeCard(
-                      icon: Icons.favorite,
-                      title: "Favorites",
-                      color: Colors.red,
-                      onTap: () {},
+
+                    const SizedBox(height: 10),
+
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: songs.length,
+                      itemBuilder: (context, index) {
+                        final song = songs[index];
+
+                        final isPlaying =
+                            AudioService.isPlaying(song['url']);
+
+                        return Card(
+                          child: ListTile(
+                            leading: Icon(
+                              isPlaying
+                                  ? Icons.graphic_eq
+                                  : Icons.music_note,
+                            ),
+                            title: Text(song['title']),
+                            subtitle: Text(song['artist']),
+                            trailing: Icon(
+                              isPlaying
+                                  ? Icons.pause
+                                  : Icons.play_arrow,
+                            ),
+                            onTap: () async {
+                              await AudioService.playUrl(
+                                url: song['url'],
+                                title: song['title'],
+                              );
+
+                              setState(() {});
+                            },
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _HomeCard({
-    required this.icon,
-    required this.title,
-    required this.color,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          color: color.withOpacity(0.15),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 40, color: color),
-            const SizedBox(height: 10),
-            Text(
-              title,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: color,
-              ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
